@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:passright/onboarding_screen.dart';
+import 'package:passright/screens/onboarding_screen.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -39,7 +39,7 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset('assets/images/success.png'),
+            Image.asset('assets/images/logo1.png'),
             const SizedBox(height: 32),
             // App Name
             const Text(

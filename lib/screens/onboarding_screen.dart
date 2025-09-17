@@ -42,7 +42,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             child: Column(
                               mainAxisAlignment: MainAxisAlignment.center,
                               children: [
-                                Image.asset(page.image, height: 180),
+                                Image.asset(
+                                  page.image,
+                                  height: 200,
+                                  width: 200,
+                                ),
                                 const SizedBox(height: 32),
                                 Text(
                                   page.title,
