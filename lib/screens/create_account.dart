@@ -1,18 +1,13 @@
+// create_account.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passright/providers/navigation_provider.dart';
 
-class CreateAccountPage extends StatefulWidget {
-  const CreateAccountPage({super.key, required this.onLoginPressed});
-
-  final void Function() onLoginPressed;
+class CreateAccountPage extends ConsumerWidget {
+  const CreateAccountPage({super.key});
 
   @override
-  State<CreateAccountPage> createState() => _CreateAccountPageState();
-}
-
-class _CreateAccountPageState extends State<CreateAccountPage> {
-  bool rememberMe = false;
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -131,15 +126,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         children: [
                           Row(
                             children: [
-                              Checkbox(
-                                value: rememberMe,
-                                onChanged: (value) {
-                                  setState(() {
-                                    rememberMe = value!;
-                                  });
-                                },
+                              Text(
+                                'I agree with the Terms & Conditions',
+                                style: TextStyle(
+                                  color: Colors.black,
+                                  fontWeight: FontWeight.w500,
+                                ),
                               ),
-                              Text('Remember Me'),
                             ],
                           ),
                           Text(
@@ -159,20 +152,13 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                         height: 50,
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.black,
+                            backgroundColor: Color.fromRGBO(0, 191, 166, 1),
                             foregroundColor: Colors.white,
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                          onPressed: () {
-                            // Navigator.push(
-                            //   context,
-                            //   MaterialPageRoute(
-                            //     builder: (context) => VerifyPage(),
-                            //   ),
-                            // );
-                          },
+                          onPressed: () {},
                           child: Text(
                             'Sign Up',
                             style: TextStyle(fontSize: 16),
@@ -245,12 +231,14 @@ class _CreateAccountPageState extends State<CreateAccountPage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                widget.onLoginPressed();
+                                // Use navigation provider instead of callback
+                                ref.read(navigationProvider.notifier).state =
+                                    AppScreen.login;
                               },
                               child: Text(
                                 'Login',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: Color.fromRGBO(0, 191, 166, 1),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

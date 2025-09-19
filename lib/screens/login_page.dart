@@ -1,19 +1,12 @@
+// login_page.dart
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passright/providers/navigation_provider.dart';
 
-class LoginPage extends StatefulWidget {
-  const LoginPage({super.key, required this.onSignUpPressed});
-
-  final void Function() onSignUpPressed;
-
+class LoginPage extends ConsumerWidget {
+  const LoginPage({super.key});
   @override
-  State<LoginPage> createState() => _LoginPageState();
-}
-
-class _LoginPageState extends State<LoginPage> {
-  bool rememberMe = false;
-
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: LayoutBuilder(
         builder: (context, constraints) {
@@ -90,19 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
-                          Row(
-                            children: [
-                              Checkbox(
-                                value: rememberMe,
-                                onChanged: (value) {
-                                  setState(() {
-                                    rememberMe = value!;
-                                  });
-                                },
-                              ),
-                              Text('Remember Me'),
-                            ],
-                          ),
+                          Row(children: [Text('Remember Me')]),
                           Text(
                             'Forgot Password',
                             style: TextStyle(
@@ -183,7 +164,6 @@ class _LoginPageState extends State<LoginPage> {
                       ),
 
                       Spacer(),
-
                       Center(
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.center,
@@ -196,12 +176,14 @@ class _LoginPageState extends State<LoginPage> {
                             ),
                             GestureDetector(
                               onTap: () {
-                                widget.onSignUpPressed();
+                                // Use navigation provider instead of callback
+                                ref.read(navigationProvider.notifier).state =
+                                    AppScreen.createAccount;
                               },
                               child: Text(
                                 'Sign Up',
                                 style: TextStyle(
-                                  color: Colors.black,
+                                  color: Color.fromRGBO(0, 191, 166, 1),
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),
