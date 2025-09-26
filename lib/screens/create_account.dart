@@ -30,14 +30,46 @@ class CreateAccountPage extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Get packages sent InTime!',
-                        style: TextStyle(fontSize: 15, color: Colors.grey),
-                      ),
+
                       SizedBox(height: 40),
 
                       // Email
+                      Text(
+                        'Full Name',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.5),
+                          ),
+                          hintText: 'Full Name',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                      ),
+                      SizedBox(height: 15),
+                      Text(
+                        'Username',
+                        style: TextStyle(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                      SizedBox(height: 5),
+                      TextField(
+                        decoration: InputDecoration(
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(15.5),
+                          ),
+                          hintText: 'Username',
+                          contentPadding: EdgeInsets.symmetric(horizontal: 16),
+                        ),
+                      ),
+                      SizedBox(height: 15),
                       Text(
                         'Email Address',
                         style: TextStyle(
@@ -53,47 +85,6 @@ class CreateAccountPage extends ConsumerWidget {
                           ),
                           hintText: 'Enter your email',
                           contentPadding: EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                      ),
-                      SizedBox(height: 15),
-
-                      // Phone
-                      Text(
-                        'Phone Number',
-                        style: TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      SizedBox(height: 5),
-                      Container(
-                        decoration: BoxDecoration(
-                          border: Border.all(color: Colors.grey),
-                          borderRadius: BorderRadius.circular(15.5),
-                        ),
-                        padding: EdgeInsets.symmetric(horizontal: 12),
-                        child: Row(
-                          children: [
-                            Text(
-                              '+234',
-                              style: TextStyle(
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Container(width: 1, height: 25, color: Colors.grey),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: TextField(
-                                keyboardType: TextInputType.phone,
-                                decoration: InputDecoration(
-                                  border: InputBorder.none,
-                                  hintText: 'Phone number',
-                                ),
-                              ),
-                            ),
-                          ],
                         ),
                       ),
                       SizedBox(height: 15),
@@ -121,28 +112,13 @@ class CreateAccountPage extends ConsumerWidget {
                       SizedBox(height: 10),
 
                       // Remember Me & Forgot Password
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            children: [
-                              Text(
-                                'I agree with the Terms & Conditions',
-                                style: TextStyle(
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w500,
-                                ),
-                              ),
-                            ],
-                          ),
-                          Text(
-                            'Forgot Password',
-                            style: TextStyle(
-                              color: Colors.red,
-                              fontWeight: FontWeight.w700,
-                            ),
-                          ),
-                        ],
+                      Text(
+                        'I agree with the Terms & Conditions',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 15,
+                        ),
                       ),
                       SizedBox(height: 20),
 

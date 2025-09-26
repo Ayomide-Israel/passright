@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/providers/navigation_provider.dart';
+import 'package:passright/screens/dashboard.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
@@ -29,16 +30,12 @@ class LoginPage extends ConsumerWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
-                      SizedBox(height: 5),
-                      Text(
-                        'Hello InTime!',
-                        style: TextStyle(fontSize: 15, color: Colors.grey),
-                      ),
-                      SizedBox(height: 40),
+
+                      SizedBox(height: 45),
 
                       // Email
                       Text(
-                        'Email Address',
+                        'Username',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.bold,
@@ -50,7 +47,7 @@ class LoginPage extends ConsumerWidget {
                           border: OutlineInputBorder(
                             borderRadius: BorderRadius.circular(15.5),
                           ),
-                          hintText: 'Enter your email',
+                          hintText: 'Username',
                           contentPadding: EdgeInsets.symmetric(horizontal: 16),
                         ),
                       ),
@@ -107,7 +104,10 @@ class LoginPage extends ConsumerWidget {
                               borderRadius: BorderRadius.circular(15),
                             ),
                           ),
-                          onPressed: () {},
+                          onPressed: () {
+                            ref.read(navigationProvider.notifier).state =
+                                AppScreen.dashboard;
+                          },
                           child: Text('Log In', style: TextStyle(fontSize: 16)),
                         ),
                       ),
