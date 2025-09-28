@@ -50,5 +50,8 @@ app.*.map.json
 env.dart
 **/lib/config/app_config.dart
 
+# Sensitive configuration files
+/lib/providers/ai_service_provider.dart
+
 # Keep templates
 !**/lib/config/app_config.template.dart
