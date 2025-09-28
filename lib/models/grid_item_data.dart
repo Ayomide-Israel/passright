@@ -17,6 +17,7 @@ final List<Map<String, dynamic>> gridItems = [
     ),
     'color': Colors.green,
   },
+
   {
     'title': 'Vocational Training',
     'subtitle': 'Learn a skill',

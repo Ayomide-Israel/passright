@@ -1,6 +1,7 @@
 // appnavigator.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passright/diva.dart';
 import 'package:passright/screens/dashboard.dart';
 import 'package:passright/screens/filter.dart';
 import 'package:passright/screens/practice.dart';
@@ -50,6 +51,8 @@ class AppNavigator extends ConsumerWidget {
               filterState.questionType ?? 'Multiple Choice', // Fallback
           topic: filterState.topic ?? 'All', // Fallback if null
         );
+      case AppScreen.chat: // Add this case
+        return const ChatScreen();
     }
   }
 }

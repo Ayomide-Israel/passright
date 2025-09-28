@@ -41,9 +41,9 @@ class PracticeSessionState {
   }
 
   Question get currentQuestion => questions[currentQuestionIndex];
+  bool get hasNextQuestion => currentQuestionIndex < questions.length - 1;
+  bool get hasPreviousQuestion => currentQuestionIndex > 0;
   int get totalQuestions => questions.length;
   double get progress =>
-      totalQuestions > 0 ? (currentQuestionIndex + 1) / totalQuestions : 0;
-  bool get hasNextQuestion => currentQuestionIndex < totalQuestions - 1;
-  bool get hasPreviousQuestion => currentQuestionIndex > 0;
+      questions.isEmpty ? 0 : (currentQuestionIndex + 1) / questions.length;
 }

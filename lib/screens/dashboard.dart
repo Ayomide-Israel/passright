@@ -17,6 +17,9 @@ class DashBoard extends ConsumerWidget {
         // Navigate to filter screen for practice questions
         ref.read(navigationProvider.notifier).state = AppScreen.filter;
         break;
+      case 'AI Tutor': // Add this case
+        ref.read(navigationProvider.notifier).state = AppScreen.chat;
+        break;
       case 'Vocational Training':
         // Show coming soon message or navigate to vocational screen
         ScaffoldMessenger.of(context).showSnackBar(
@@ -90,14 +93,20 @@ class DashBoard extends ConsumerWidget {
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.grey[100],
+                  color: Color.fromRGBO(241, 242, 245, 1),
                   borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    // Add this line
+                    color: Colors.grey[300]!, // Border color
+                    width: 1.0, // Border width
+                  ),
                 ),
                 child: TextField(
                   decoration: InputDecoration(
                     hintText: 'Search by subject, topic, or year',
                     border: InputBorder.none,
                     icon: Icon(Icons.search, color: Colors.teal),
+                    fillColor: Color.fromRGBO(241, 242, 245, 1),
                   ),
                 ),
               ),
@@ -171,6 +180,19 @@ class DashBoard extends ConsumerWidget {
           ),
         ),
       ),
+
+      // Add Floating Action Button
+      floatingActionButton: FloatingActionButton(
+        onPressed: () {
+          // Set navigation source to dashboard before navigating
+          ref.read(chatNavigationSourceProvider.notifier).state =
+              ChatSource.dashboard;
+          ref.read(navigationProvider.notifier).state = AppScreen.chat;
+        },
+        backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
+        child: Image.asset('assets/images/Group_9.png'),
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
       // Bottom navigation bar
       bottomNavigationBar: BottomNavigationBar(

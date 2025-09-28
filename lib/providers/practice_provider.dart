@@ -1,5 +1,6 @@
 // providers/practice_session_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:passright/models/question_model.dart';
 import '../models/practice_session_state.dart';
 import '../question_repo.dart';
 
@@ -33,19 +34,32 @@ class PracticeSessionNotifier extends StateNotifier<PracticeSessionState> {
 
   // Submit answer and show explanation
   void submitAnswer() {
-    if (state.selectedAnswer == null) return;
+    if (state.selectedAnswer == null || state.showExplanation) return;
 
-    final isCorrect =
-        state.selectedAnswer == state.currentQuestion.correctAnswer;
+    final currentQuestion = state.currentQuestion;
+    final isCorrect = state.selectedAnswer == currentQuestion.correctAnswer;
+
+    final updatedQuestions = List<Question>.from(state.questions);
+    updatedQuestions[state.currentQuestionIndex] =
+        updatedQuestions[state.currentQuestionIndex].copyWith(
+          isAnswered: true,
+          userAnswer: state.selectedAnswer,
+          isCorrect: isCorrect,
+        );
+
+    // Recalculate scores from scratch to avoid double-counting
+    final correctAnswers = updatedQuestions
+        .where((q) => q.isCorrect == true)
+        .length;
+    final incorrectAnswers = updatedQuestions
+        .where((q) => q.isAnswered && q.isCorrect == false)
+        .length;
 
     state = state.copyWith(
+      questions: updatedQuestions,
       showExplanation: true,
-      correctAnswers: isCorrect
-          ? state.correctAnswers + 1
-          : state.correctAnswers,
-      incorrectAnswers: !isCorrect
-          ? state.incorrectAnswers + 1
-          : state.incorrectAnswers,
+      correctAnswers: correctAnswers,
+      incorrectAnswers: incorrectAnswers,
     );
   }
 

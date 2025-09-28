@@ -9,6 +9,10 @@ class QuestionDetailScreen extends ConsumerWidget {
   final int correctAnswer;
   final String explanation;
 
+  final bool isAnswered; // Add this
+  final int? userAnswer; // Add this
+  final bool? isCorrect;
+
   const QuestionDetailScreen({
     super.key,
     required this.questionNumber,
@@ -16,6 +20,9 @@ class QuestionDetailScreen extends ConsumerWidget {
     required this.options,
     required this.correctAnswer,
     required this.explanation,
+    this.isAnswered = false, // Default to false
+    this.userAnswer,
+    this.isCorrect,
   });
 
   @override

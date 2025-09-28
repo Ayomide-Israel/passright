@@ -10,6 +10,9 @@ class Question {
   final String examType;
   final String questionType;
   final int? year;
+  final bool isAnswered; // Add this
+  final int? userAnswer; // Add this
+  final bool? isCorrect; // Add this
 
   Question({
     required this.id,
@@ -22,6 +25,9 @@ class Question {
     required this.examType,
     required this.questionType,
     this.year,
+    this.isAnswered = false, // Default to false
+    this.userAnswer,
+    this.isCorrect,
   });
 
   factory Question.fromJson(Map<String, dynamic> json) {
@@ -36,6 +42,9 @@ class Question {
       examType: json['examType'],
       questionType: json['questionType'],
       year: json['year'],
+      isAnswered: json['isAnswered'] ?? false,
+      userAnswer: json['userAnswer'],
+      isCorrect: json['isCorrect'],
     );
   }
 
@@ -51,6 +60,41 @@ class Question {
       'examType': examType,
       'questionType': questionType,
       'year': year,
+      'isAnswered': isAnswered,
+      'userAnswer': userAnswer,
+      'isCorrect': isCorrect,
     };
+  }
+
+  Question copyWith({
+    int? id,
+    String? question,
+    List<String>? options,
+    int? correctAnswer,
+    String? explanation,
+    String? subject,
+    String? topic,
+    String? examType,
+    String? questionType,
+    int? year,
+    bool? isAnswered,
+    int? userAnswer,
+    bool? isCorrect,
+  }) {
+    return Question(
+      id: id ?? this.id,
+      question: question ?? this.question,
+      options: options ?? this.options,
+      correctAnswer: correctAnswer ?? this.correctAnswer,
+      explanation: explanation ?? this.explanation,
+      subject: subject ?? this.subject,
+      topic: topic ?? this.topic,
+      examType: examType ?? this.examType,
+      questionType: questionType ?? this.questionType,
+      year: year ?? this.year,
+      isAnswered: isAnswered ?? this.isAnswered,
+      userAnswer: userAnswer ?? this.userAnswer,
+      isCorrect: isCorrect ?? this.isCorrect,
+    );
   }
 }
