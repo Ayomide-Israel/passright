@@ -5,6 +5,7 @@ import 'package:youtube_player_flutter/youtube_player_flutter.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/providers/resource_provider.dart';
 import 'package:passright/providers/chat_provider.dart';
+import 'package:url_launcher/url_launcher.dart'; // <-- 1. ADD THIS IMPORT
 
 class VideoPlayerScreen extends ConsumerStatefulWidget {
   const VideoPlayerScreen({super.key});
@@ -29,11 +30,12 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
 
   void _initializeVideoPlayer() {
     final video = ref.read(selectedVideoProvider);
-    
+
     if (video != null && !_isInitialized) {
       try {
-        String videoId = YoutubePlayer.convertUrlToId(video.id) ?? video.id;
-        
+        // The video.id field from the provider is the YouTube video ID
+        String videoId = video.id; //
+
         _controller = YoutubePlayerController(
           initialVideoId: videoId,
           flags: const YoutubePlayerFlags(
@@ -60,7 +62,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
     if (_controller.value.hasError) {
       print('❌ YouTube player error: ${_controller.value.errorCode}');
       String errorMessage = 'Video playback error';
-      
+
       // Provide more specific error messages
       switch (_controller.value.errorCode) {
         case 2:
@@ -77,7 +79,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
           errorMessage = 'Video playback not allowed';
           break;
       }
-      
+
       setState(() {
         _errorMessage = errorMessage;
       });
@@ -95,13 +97,19 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
 
   @override
   void deactivate() {
-    _controller.pause();
+    // Add check to prevent error if controller isn't ready
+    if (_isInitialized) {
+      _controller.pause();
+    }
     super.deactivate();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    // Add check to prevent error if controller isn't ready
+    if (_isInitialized) {
+      _controller.dispose();
+    }
     super.dispose();
   }
 
@@ -112,9 +120,10 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
         subject: video.subject,
         topic: video.topic,
         video: video,
-      );
-      ref.read(chatNavigationSourceProvider.notifier).state = ChatSource.video;
-      ref.read(navigationProvider.notifier).state = AppScreen.chat;
+      ); //
+      ref.read(chatNavigationSourceProvider.notifier).state =
+          ChatSource.video; //
+      ref.read(navigationProvider.notifier).state = AppScreen.chat; //
     }
   }
 
@@ -127,9 +136,36 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
     _initializeVideoPlayer();
   }
 
+  // <-- 2. ADD THIS HELPER FUNCTION TO OPEN THE BROWSER
+  void _openWebsite(String url) async {
+    print('Attempting to open website: $url');
+    final Uri uri = Uri.parse(url);
+    try {
+      // Launch the URL in an external browser
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        print('Could not launch $url');
+        // Optional: Show an error message to the user
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Could not open the website.')),
+          );
+        }
+      }
+    } catch (e) {
+      print('Error launching URL: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('An error occurred: $e')));
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
-    final video = ref.watch(selectedVideoProvider);
+    final video = ref.watch(selectedVideoProvider); //
 
     if (video == null) {
       return Scaffold(
@@ -139,7 +175,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
             icon: const Icon(Icons.arrow_back),
             onPressed: () {
               ref.read(navigationProvider.notifier).state =
-                  AppScreen.exploreResources;
+                  AppScreen.exploreResources; //
             },
           ),
         ),
@@ -154,7 +190,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
           icon: const Icon(Icons.arrow_back),
           onPressed: () {
             ref.read(navigationProvider.notifier).state =
-                AppScreen.exploreResources;
+                AppScreen.exploreResources; //
           },
         ),
         actions: [
@@ -196,7 +232,7 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                       ],
                     ),
                   ),
-                
+
                 // YouTube Player
                 YoutubePlayer(
                   controller: _controller,
@@ -206,9 +242,9 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                     playedColor: Colors.blue,
                     handleColor: Colors.blueAccent,
                   ),
-                  thumbnail: video.thumbnailUrl != null 
-                    ? Image.network(video.thumbnailUrl!)
-                    : null,
+                  thumbnail: video.thumbnailUrl.isNotEmpty
+                      ? Image.network(video.thumbnailUrl)
+                      : null,
                   bufferIndicator: const Center(
                     child: CircularProgressIndicator(),
                   ),
@@ -245,6 +281,41 @@ class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
                           const SizedBox(height: 16),
                           Text(video.description),
                           const SizedBox(height: 20),
+
+                          // <-- 3. ADD THE CONDITIONAL KHAN ACADEMY BUTTON HERE
+                          // This button only appears if the video ID is the specific Khan Academy one
+                          if (video.id == 'vDqOoI-4Z6M')
+                            Padding(
+                              padding: const EdgeInsets.only(bottom: 12.0),
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton.icon(
+                                  onPressed: () {
+                                    // Open the specific Khan Academy Algebra page
+                                    _openWebsite(
+                                      'https://www.khanacademy.org/math/algebra-home',
+                                    );
+                                  },
+                                  icon: const Icon(
+                                    Icons.school_outlined,
+                                  ), // Icon for learning
+                                  label: const Text(
+                                    'Dive Deeper with Khan Academy',
+                                  ),
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(
+                                      0xFF142E2C,
+                                    ), // Khan Academy dark green
+                                    foregroundColor: Colors.white,
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+
+                          // This is the existing "Dive Deeper with AI" button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
