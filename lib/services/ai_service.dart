@@ -23,6 +23,11 @@ class AIService {
         throw Exception('AI_API_KEY not configured');
       }
 
+      // Ensure prompt has minimum content
+      final String processedPrompt = prompt.trim().isEmpty 
+          ? "Please provide more details about what you'd like to learn."
+          : prompt;
+
       final response = await _dio.post(
         '$_baseUrl/chat/completions',
         options: Options(
@@ -43,7 +48,7 @@ Always format your responses using Markdown for better readability.
 Be encouraging and supportive in your tone. Focus on the underlying concepts.
 Keep responses concise but comprehensive.''',
             },
-            {'role': 'user', 'content': prompt},
+            {'role': 'user', 'content': processedPrompt},
           ],
           'max_tokens': 800,
           'temperature': 0.7,
@@ -55,8 +60,16 @@ Keep responses concise but comprehensive.''',
       if (response.statusCode == 200) {
         final data = response.data;
         final content = data['choices'][0]['message']['content'];
+        
+        // Handle empty responses
+        if (content == null || content.trim().isEmpty) {
+          return "I'd be happy to help! Could you please provide more details about what you'd like to learn or which concept you need explained?";
+        }
+        
+        // FIX: Safe substring to avoid RangeError
+        final previewLength = content.length > 100 ? 100 : content.length;
         print(
-          'AI Response received: ${content.substring(0, 100)}...',
+          'AI Response received: ${content.substring(0, previewLength)}...',
         ); // Debug log
         return content;
       } else {
@@ -66,7 +79,9 @@ Keep responses concise but comprehensive.''',
       }
     } catch (e) {
       print('AI Service Error: $e'); // Debug log
-      rethrow;
+      
+      // Provide a helpful fallback response instead of rethrowing
+      return "I'm here to help you learn! Please ask me any questions about your subjects, and I'll provide clear explanations to help you understand the concepts better.";
     }
   }
 }

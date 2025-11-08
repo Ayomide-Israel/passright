@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_markdown/flutter_markdown.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:dash_chat_2/dash_chat_2.dart';
+import 'package:passright/config/app_config.dart';
+import 'package:passright/providers/chat_provider.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/services/ai_service.dart';
 import 'package:passright/services/chat_storage_service.dart';
@@ -17,7 +19,6 @@ class TypingIndicator extends StatelessWidget {
         children: [
           CircleAvatar(
             backgroundColor: Theme.of(context).colorScheme.primary,
-
             child: const Text('AI'),
           ),
           const SizedBox(width: 8),
@@ -53,7 +54,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
   List<ChatUser> _typingUsers = <ChatUser>[];
   bool _hasSentInitialMessage = false;
   final ChatStorageService _storageService = ChatStorageService();
-  String _chatContext = '';
 
   @override
   void initState() {
@@ -75,40 +75,80 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     if (mounted) {
       setState(() {
         _messages.addAll(savedMessages);
-        // Build context from previous messages
-        _chatContext = savedMessages
-            .where((msg) => msg.user.id == _divaUser.id)
-            .map((msg) => msg.text)
-            .join('\n\n');
       });
     }
   }
 
+  // In diva.dart - replace the _sendInitialMessage method
   void _sendInitialMessage() {
     final chatContext = ref.read(chatContextProvider);
+    final chatSource = ref.read(chatNavigationSourceProvider);
 
-    if (chatContext != null && !_hasSentInitialMessage) {
-      final initialMessage =
-          """
+    // Only send initial message for specific sources that have context
+    if (!_hasSentInitialMessage) {
+      switch (chatSource) {
+        case ChatSource.explanation:
+          // Only send for explanation source with question context
+          if (chatContext != null && chatContext.question != null) {
+            final question = chatContext.question!;
+            final initialMessage =
+                """
 Please explain this question and the underlying concept in detail:
 
-Subject: ${chatContext.subject}
-Topic: ${chatContext.topic}
-Question: ${chatContext.question.question}
-Options: ${chatContext.question.options.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}. ${e.value}').join(', ')}
-Correct Answer: ${String.fromCharCode(65 + chatContext.question.correctAnswer)}. ${chatContext.question.options[chatContext.question.correctAnswer]}
+Subject: ${chatContext.subject ?? 'Unknown'}
+Topic: ${chatContext.topic ?? 'Unknown'}
+Question: ${question.question}
+Options: ${question.options.asMap().entries.map((e) => '${String.fromCharCode(65 + e.key)}. ${e.value}').join(', ')}
+Correct Answer: ${String.fromCharCode(65 + question.correctAnswer)}. ${question.options[question.correctAnswer]}
 
 Please provide a comprehensive explanation of the concept behind this question.
 """;
 
-      _sendMessage(
-        ChatMessage(
-          user: _currentUser,
-          createdAt: DateTime.now(),
-          text: initialMessage,
-        ),
-      );
-      _hasSentInitialMessage = true;
+            _sendMessage(
+              ChatMessage(
+                user: _currentUser,
+                createdAt: DateTime.now(),
+                text: initialMessage,
+              ),
+            );
+            _hasSentInitialMessage = true;
+          }
+          break;
+
+        case ChatSource.resources:
+        case ChatSource.video:
+          // For resources and video, you might want a different initial message
+          if (chatContext != null) {
+            final subject = chatContext.subject ?? 'this subject';
+            final topic = chatContext.topic != null
+                ? ' about ${chatContext.topic}'
+                : '';
+            final videoContext = chatContext.video != null
+                ? ' regarding the video "${chatContext.video!.title}"'
+                : '';
+
+            final initialMessage =
+                "I'd like to learn more about $subject$topic$videoContext. Can you provide a comprehensive explanation?";
+
+            _sendMessage(
+              ChatMessage(
+                user: _currentUser,
+                createdAt: DateTime.now(),
+                text: initialMessage,
+              ),
+            );
+            _hasSentInitialMessage = true;
+          }
+          break;
+
+        case ChatSource.dashboard:
+        case ChatSource.grid:
+          // For dashboard and grid, do NOT send any initial message
+          // User starts with a clean chat
+          _hasSentInitialMessage =
+              true; // Set to true to prevent any auto-messages
+          break;
+      }
     }
   }
 
@@ -128,30 +168,40 @@ Please provide a comprehensive explanation of the concept behind this question.
       _typingUsers = [_divaUser];
     });
     await _storageService.saveMessages(_messages);
-    await _fetchAIResponse(message.text);
+
+    // Build context from previous AI messages for better continuity
+    final previousContext = _messages
+        .where((msg) => msg.user.id == _divaUser.id)
+        .map((msg) => msg.text)
+        .join('\n\n');
+
+    await _fetchAIResponse(message.text, context: previousContext);
   }
 
-  Future<void> _fetchAIResponse(String inputText) async {
+  Future<void> _fetchAIResponse(String inputText, {String context = ''}) async {
     try {
-      final aiService = AIService();
+      print('🤖 Starting AI request...');
+      
+      // FIX: Safe substring to avoid RangeError
+      final inputPreviewLength = inputText.length > 100 ? 100 : inputText.length;
+      print('🤖 Input: ${inputText.substring(0, inputPreviewLength)}${inputText.length > 100 ? '...' : ''}');
+      
+      if (context.isNotEmpty) {
+        print('🤖 Context length: ${context.length} characters');
+      }
+
+      final aiService = AIService(apiKey: AppConfig.apiKey);
 
       setState(() {
         _typingUsers = [_divaUser];
       });
 
-      final contextualPrompt =
-          '''
-Previous context:
-$_chatContext
-
-Current question:
-$inputText
-''';
-
-      final response = await aiService.getAIResponse(contextualPrompt);
-      print(
-        'AI Response received: ${response.substring(0, 50)}...',
-      ); // Debug log
+      // Use the provided context for better conversation continuity
+      final response = await aiService.getAIResponse(
+        inputText,
+        context: context,
+      );
+      print('✅ AI Response received successfully');
 
       if (mounted) {
         final divaChatMessage = ChatMessage(
@@ -163,21 +213,20 @@ $inputText
         setState(() {
           _messages.insert(0, divaChatMessage);
           _typingUsers = [];
-          _chatContext += '\n\n${divaChatMessage.text}';
         });
         await _storageService.saveMessages(_messages);
       }
     } catch (e) {
-      print('Error in _fetchAIResponse: $e'); // Debug log
+      print('❌ CRITICAL ERROR in _fetchAIResponse: $e');
+
+      final errorMessage = _getErrorMessage(e);
+      final errorChatMessage = ChatMessage(
+        user: _divaUser,
+        createdAt: DateTime.now(),
+        text: errorMessage,
+      );
 
       if (mounted) {
-        final errorMessage = _getErrorMessage(e);
-        final errorChatMessage = ChatMessage(
-          user: _divaUser,
-          createdAt: DateTime.now(),
-          text: errorMessage,
-        );
-
         setState(() {
           _messages.insert(0, errorChatMessage);
           _typingUsers = [];
@@ -210,16 +259,19 @@ ${_getFallbackResponse("")}
 """;
     }
 
+    // FIX: Safe substring to avoid RangeError
+    final errorPreviewLength = errorString.length > 100 ? 100 : errorString.length;
+    final errorPreview = errorString.substring(0, errorPreviewLength) + (errorString.length > 100 ? '...' : '');
+
     return """
 ⚠️ **Temporary Issue**
 
-I'm experiencing a technical difficulty. Please try again.
+I'm experiencing a technical difficulty: $errorPreview
 
 ${_getFallbackResponse("")}
 """;
   }
 
-  // Update the math formatting in _getFallbackResponse
   String _getFallbackResponse(String inputText) {
     if (inputText.contains('3x') && inputText.contains('4 = 11')) {
       return """
@@ -254,18 +306,30 @@ ${_getFallbackResponse("")}
   void _handleBackButton() {
     final source = ref.read(chatNavigationSourceProvider);
 
-    if (source == ChatSource.explanation) {
-      // Go back to the explanation screen
-      ref.read(navigationProvider.notifier).state = AppScreen.practiceSession;
-    } else {
-      // Go back to dashboard
-      ref.read(navigationProvider.notifier).state = AppScreen.dashboard;
+    switch (source) {
+      case ChatSource.explanation:
+        // Go back to practice session
+        ref.read(navigationProvider.notifier).state = AppScreen.practiceSession;
+        break;
+      case ChatSource.resources:
+        // Go back to explore resources
+        ref.read(navigationProvider.notifier).state =
+            AppScreen.exploreResources;
+        break;
+      case ChatSource.video:
+        // Go back to video player
+        ref.read(navigationProvider.notifier).state = AppScreen.videoPlayer;
+        break;
+      case ChatSource.dashboard:
+      case ChatSource.grid:
+        // Go back to dashboard for both dashboard and grid sources
+        ref.read(navigationProvider.notifier).state = AppScreen.dashboard;
+        break;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final chatContext = ref.watch(chatContextProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -275,11 +339,32 @@ ${_getFallbackResponse("")}
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             const Text('Diva AI Tutor'),
-            if (chatContext != null)
-              Text(
-                '${chatContext.subject} - ${chatContext.topic}',
-                style: const TextStyle(fontSize: 12),
-              ),
+            Consumer(
+              builder: (context, ref, child) {
+                final chatSource = ref.watch(chatNavigationSourceProvider);
+                final chatContext = ref.watch(chatContextProvider);
+
+                String subtitle = '';
+                switch (chatSource) {
+                  case ChatSource.dashboard:
+                    subtitle = 'Quick Chat';
+                    break;
+                  case ChatSource.grid:
+                    subtitle = 'AI Tutor';
+                    break;
+                  case ChatSource.explanation:
+                    subtitle =
+                        '${chatContext?.subject ?? ''} - ${chatContext?.topic ?? ''}';
+                    break;
+                  case ChatSource.resources:
+                  case ChatSource.video:
+                    subtitle = 'Learning Assistant';
+                    break;
+                }
+
+                return Text(subtitle, style: const TextStyle(fontSize: 12));
+              },
+            ),
           ],
         ),
         leading: IconButton(
@@ -447,7 +532,7 @@ ${_getFallbackResponse("")}
                 borderRadius: BorderRadius.circular(25),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.grey.withOpacity(0.1),
+                    color: Colors.grey.withValues(alpha: 0.1),
                     spreadRadius: 1,
                     blurRadius: 3,
                     offset: const Offset(0, -1),

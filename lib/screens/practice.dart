@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/models/practice_session_state.dart';
 import 'package:passright/models/question_model.dart';
+import 'package:passright/providers/chat_provider.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/providers/practice_provider.dart';
 
@@ -26,6 +27,8 @@ class PracticeSessionScreen extends ConsumerStatefulWidget {
 }
 
 class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
+  final ScrollController _scrollController = ScrollController();
+
   @override
   void initState() {
     super.initState();
@@ -33,6 +36,12 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _resetAndInitializeSession();
     });
+  }
+
+  @override
+  void dispose() {
+    _scrollController.dispose();
+    super.dispose();
   }
 
   void _resetAndInitializeSession() {
@@ -60,10 +69,22 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
 
   void _nextQuestion() {
     ref.read(practiceSessionProvider.notifier).nextQuestion();
+    // Scroll to top when moving to next question
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _previousQuestion() {
     ref.read(practiceSessionProvider.notifier).previousQuestion();
+    // Scroll to top when moving to previous question
+    _scrollController.animateTo(
+      0,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeInOut,
+    );
   }
 
   void _selectAnswer(int answerIndex) {
@@ -127,161 +148,193 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     final currentQuestion = sessionState.currentQuestion;
 
     return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.only(
-          bottom: 20,
-          left: 20,
-          right: 20,
-          top: 50,
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Stack(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          controller: _scrollController,
+          padding: const EdgeInsets.only(
+            bottom: 20,
+            left: 20,
+            right: 20,
+            top: 20, // Reduced top padding for smaller screens
+          ),
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.vertical -
+                  40, // Ensure minimum height
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                // Back button
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back),
-                    style: OutlinedButton.styleFrom(
-                      shape: const CircleBorder(),
-                      side: BorderSide(
-                        color: Color.fromRGBO(0, 191, 166, 1),
-                        width: 2.0,
+                // Header with back button and title
+                Stack(
+                  children: [
+                    // Back button (left aligned)
+                    Align(
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: const Icon(Icons.arrow_back),
+                        style: OutlinedButton.styleFrom(
+                          shape: const CircleBorder(),
+                          side: BorderSide(
+                            color: Color.fromRGBO(0, 191, 166, 1),
+                            width: 2.0,
+                          ),
+                          padding: const EdgeInsets.all(12),
+                        ),
+                        onPressed: _handleBackButton,
                       ),
-                      padding: EdgeInsets.all(12),
                     ),
-                    onPressed: _handleBackButton,
-                  ),
-                ),
-                // Centered title
-                const Align(
-                  alignment: Alignment.center,
-                  child: SizedBox(
-                    height: 41,
-                    width: 163,
-                    child: Card(
-                      color: Color.fromRGBO(255, 255, 255, 1),
-                      child: Center(
-                        child: Text(
-                          'Past Questions',
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color: Color.fromRGBO(26, 61, 124, 1),
+
+                    // Centered title (with proper constraints)
+                    Align(
+                      alignment: Alignment.center,
+                      child: ConstrainedBox(
+                        constraints: const BoxConstraints(
+                          maxWidth: 200, // Limit width to prevent overlap
+                        ),
+                        child: const SizedBox(
+                          height: 41,
+                          child: Card(
+                            color: Color.fromRGBO(255, 255, 255, 1),
+                            child: Center(
+                              child: Text(
+                                'Past Questions',
+                                style: TextStyle(
+                                  fontSize: 18,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(26, 61, 124, 1),
+                                ),
+                              ),
+                            ),
                           ),
                         ),
                       ),
                     ),
+                  ],
+                ),
+
+                const SizedBox(height: 20), // Reduced spacing
+                Text(
+                  widget.subject,
+                  style: const TextStyle(
+                    color: Color.fromRGBO(26, 61, 124, 1),
+                    fontWeight: FontWeight.w700,
+                    fontSize: 24,
                   ),
                 ),
-              ],
-            ),
-
-            const SizedBox(height: 35),
-            Text(
-              widget.subject,
-              style: TextStyle(
-                color: Color.fromRGBO(26, 61, 124, 1),
-                fontWeight: FontWeight.w700,
-                fontSize: 24,
-              ),
-            ),
-            const SizedBox(height: 27),
-            Container(
-              height: 30,
-              width: 235,
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(10),
-                color: Color.fromRGBO(255, 255, 255, 1),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  const Text(
-                    'Questions Type',
-                    style: TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color.fromRGBO(26, 61, 124, 1),
-                    ),
+                const SizedBox(height: 16), // Reduced spacing
+                // Question type chip
+                Container(
+                  constraints: const BoxConstraints(maxWidth: 235),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
                   ),
-                  const SizedBox(width: 4),
-                  Text(
-                    widget.questionType,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: Color.fromRGBO(0, 191, 166, 1),
-                    ),
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(10),
+                    color: const Color.fromRGBO(255, 255, 255, 1),
                   ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 30),
-
-            // Search bar
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(
-                color: Color.fromRGBO(241, 242, 245, 1),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: Colors.grey[300]!, width: 1.0),
-              ),
-              child: const TextField(
-                decoration: InputDecoration(
-                  hintText: 'Search Question',
-                  border: InputBorder.none,
-                  icon: Icon(Icons.search, color: Colors.teal),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Text(
+                        'Questions Type',
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: Color.fromRGBO(26, 61, 124, 1),
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Flexible(
+                        child: Text(
+                          widget.questionType,
+                          style: const TextStyle(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w500,
+                            color: Color.fromRGBO(0, 191, 166, 1),
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
-              ),
-            ),
+                const SizedBox(height: 20), // Reduced spacing
+                // Search bar
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  decoration: BoxDecoration(
+                    color: const Color.fromRGBO(241, 242, 245, 1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[300]!, width: 1.0),
+                  ),
+                  child: const TextField(
+                    decoration: InputDecoration(
+                      hintText: 'Search Question',
+                      border: InputBorder.none,
+                      icon: Icon(Icons.search, color: Colors.teal),
+                    ),
+                  ),
+                ),
 
-            const SizedBox(height: 40),
-            // Progress indicator
-            LinearProgressIndicator(
-              value: sessionState.progress,
-              backgroundColor: Colors.grey[300],
-              color: const Color.fromRGBO(0, 191, 166, 1),
-            ),
-            const SizedBox(height: 14),
-
-            // Question header
-            Card(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
+                const SizedBox(height: 20), // Reduced spacing
+                // Progress indicator
+                Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Question ${sessionState.currentQuestionIndex + 1} of ${sessionState.totalQuestions}',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(26, 61, 124, 1),
-                      ),
+                    LinearProgressIndicator(
+                      value: sessionState.progress,
+                      backgroundColor: Colors.grey[300],
+                      color: const Color.fromRGBO(0, 191, 166, 1),
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      currentQuestion.question,
-                      style: const TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
+                      '${(sessionState.progress * 100).round()}% Complete',
+                      style: const TextStyle(fontSize: 12, color: Colors.grey),
                     ),
                   ],
                 ),
-              ),
-            ),
-            const SizedBox(height: 20),
+                const SizedBox(height: 20), // Reduced spacing
+                // Question header
+                Card(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Question ${sessionState.currentQuestionIndex + 1} of ${sessionState.totalQuestions}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Color.fromRGBO(26, 61, 124, 1),
+                          ),
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          currentQuestion.question,
+                          style: const TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 20),
 
-            // Options or Explanation based on state
-            if (!sessionState.showExplanation)
-              _buildOptionsSection(sessionState, currentQuestion)
-            else
-              _buildExplanationSection(sessionState, currentQuestion),
-          ],
+                // Options or Explanation based on state
+                if (!sessionState.showExplanation)
+                  _buildOptionsSection(sessionState, currentQuestion)
+                else
+                  _buildExplanationSection(sessionState, currentQuestion),
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -291,62 +344,67 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     PracticeSessionState sessionState,
     Question currentQuestion,
   ) {
-    return Expanded(
-      child: Column(
-        children: [
-          const Text(
-            'Select your answer:',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 16),
+    return Column(
+      children: [
+        const Text(
+          'Select your answer:',
+          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+        ),
+        const SizedBox(height: 16),
 
-          Expanded(
-            child: ListView.builder(
-              itemCount: currentQuestion.options.length,
-              itemBuilder: (context, index) {
-                final option = currentQuestion.options[index];
-                return Card(
-                  margin: const EdgeInsets.only(bottom: 8),
-                  child: ListTile(
-                    title: Text(option),
-                    leading: Radio<int>(
-                      value: index,
-                      groupValue: sessionState.selectedAnswer,
-                      onChanged: (int? value) {
-                        _selectAnswer(value!);
-                      },
-                    ),
-                    onTap: () {
-                      _selectAnswer(index);
+        // Options list - using ConstrainedBox to limit height on small screens
+        ConstrainedBox(
+          constraints: BoxConstraints(
+            maxHeight: MediaQuery.of(context).size.height * 0.4, // Limit height
+          ),
+          child: ListView.builder(
+            shrinkWrap: true,
+            physics: const AlwaysScrollableScrollPhysics(),
+            itemCount: currentQuestion.options.length,
+            itemBuilder: (context, index) {
+              final option = currentQuestion.options[index];
+              return Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                child: ListTile(
+                  title: Text(option),
+                  leading: Radio<int>(
+                    value: index,
+                    groupValue: sessionState.selectedAnswer,
+                    onChanged: (int? value) {
+                      _selectAnswer(value!);
                     },
                   ),
-                );
-              },
-            ),
-          ),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: sessionState.selectedAnswer == null
-                  ? null
-                  : _submitAnswer,
-              style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
-                foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
+                  onTap: () {
+                    _selectAnswer(index);
+                  },
                 ),
-                fixedSize: const Size(188, 50),
-              ),
-              child: const Text(
-                'SUBMIT ANSWER',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              );
+            },
+          ),
+        ),
+        const SizedBox(height: 16),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: sessionState.selectedAnswer == null
+                ? null
+                : _submitAnswer,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
               ),
             ),
+            child: const Text(
+              'SUBMIT ANSWER',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20), // Extra padding at bottom
+      ],
     );
   }
 
@@ -357,98 +415,95 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
     final isCorrect =
         sessionState.selectedAnswer == currentQuestion.correctAnswer;
 
-    return Expanded(
-      child: Column(
-        children: [
-          Card(
-            color: isCorrect ? Colors.green[50] : Colors.red[50],
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Icon(
-                        isCorrect ? Icons.check_circle : Icons.cancel,
+    return Column(
+      children: [
+        Card(
+          color: isCorrect ? Colors.green[50] : Colors.red[50],
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Icon(
+                      isCorrect ? Icons.check_circle : Icons.cancel,
+                      color: isCorrect ? Colors.green : Colors.red,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      isCorrect ? 'Correct!' : 'Incorrect',
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontWeight: FontWeight.bold,
                         color: isCorrect ? Colors.green : Colors.red,
                       ),
-                      const SizedBox(width: 8),
-                      Text(
-                        isCorrect ? 'Correct!' : 'Incorrect',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: isCorrect ? Colors.green : Colors.red,
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Explanation:',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(currentQuestion.explanation),
-                  const SizedBox(height: 16),
-                  const Text(
-                    'Dive Deeper with AI',
-                    style: TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(height: 8),
-                  const Text(
-                    'Ask our AI tutor for a more detailed explanation of this concept.',
-                  ),
-                ],
-              ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                const Text(
+                  'Explanation:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                Text(currentQuestion.explanation),
+                const SizedBox(height: 16),
+                const Text(
+                  'Dive Deeper with AI',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 8),
+                const Text(
+                  'Ask our AI tutor for a more detailed explanation of this concept.',
+                ),
+              ],
             ),
           ),
-          const SizedBox(height: 24),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              ElevatedButton(
-                onPressed: sessionState.hasPreviousQuestion
-                    ? _previousQuestion
-                    : null,
-                child: const Text('Previous'),
-              ),
-              ElevatedButton(
-                onPressed: _nextQuestion,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
-                  foregroundColor: Colors.white,
-                ),
-                child: Text(
-                  sessionState.hasNextQuestion ? 'Next Question' : 'Finish',
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 15),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed:
-                  _navigateToChat, // Use the existing method instead of inline navigation
+        ),
+        const SizedBox(height: 24),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            ElevatedButton(
+              onPressed: sessionState.hasPreviousQuestion
+                  ? _previousQuestion
+                  : null,
+              child: const Text('Previous'),
+            ),
+            ElevatedButton(
+              onPressed: _nextQuestion,
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color.fromRGBO(26, 61, 124, 1),
+                backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
                 foregroundColor: Colors.white,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                fixedSize: const Size(188, 50),
               ),
-              child: const Text(
-                'Dive Deeper With AI',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              child: Text(
+                sessionState.hasNextQuestion ? 'Next Question' : 'Finish',
               ),
             ),
+          ],
+        ),
+        const SizedBox(height: 15),
+        SizedBox(
+          width: double.infinity,
+          child: ElevatedButton(
+            onPressed: _navigateToChat,
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color.fromRGBO(26, 61, 124, 1),
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+            ),
+            child: const Text(
+              'Dive Deeper With AI',
+              style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+            ),
           ),
-        ],
-      ),
+        ),
+        const SizedBox(height: 20), // Extra padding at bottom
+      ],
     );
   }
 
@@ -461,40 +516,49 @@ class _PracticeSessionScreenState extends ConsumerState<PracticeSessionScreen> {
           onPressed: _handleCompletionBack,
         ),
       ),
-      body: Center(
-        child: Padding(
+      body: SafeArea(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(20),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const Icon(Icons.celebration, size: 100, color: Colors.green),
-              const SizedBox(height: 24),
-              Text(
-                'Practice Completed!',
-                style: Theme.of(context).textTheme.headlineMedium,
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Score: ${sessionState.correctAnswers}/${sessionState.totalQuestions}',
-                style: const TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
+          child: ConstrainedBox(
+            constraints: BoxConstraints(
+              minHeight:
+                  MediaQuery.of(context).size.height -
+                  MediaQuery.of(context).padding.vertical -
+                  80,
+            ),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                const Icon(Icons.celebration, size: 80, color: Colors.green),
+                const SizedBox(height: 24),
+                Text(
+                  'Practice Completed!',
+                  style: Theme.of(context).textTheme.headlineMedium,
+                  textAlign: TextAlign.center,
                 ),
-              ),
-              const SizedBox(height: 32),
-              ElevatedButton(
-                onPressed: _handleCompletionBack,
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 30,
-                    vertical: 15,
+                const SizedBox(height: 16),
+                Text(
+                  'Score: ${sessionState.correctAnswers}/${sessionState.totalQuestions}',
+                  style: const TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                child: const Text('Start New Practice Session'),
-              ),
-            ],
+                const SizedBox(height: 32),
+                ElevatedButton(
+                  onPressed: _handleCompletionBack,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 15,
+                    ),
+                  ),
+                  child: const Text('Start New Practice Session'),
+                ),
+              ],
+            ),
           ),
         ),
       ),

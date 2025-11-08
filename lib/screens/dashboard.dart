@@ -3,37 +3,37 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/models/grid_item_data.dart';
+import 'package:passright/providers/chat_provider.dart';
 
 class DashBoard extends ConsumerWidget {
   const DashBoard({super.key});
 
+  // In dashboard.dart - make sure this exists
   void _handleGridItemTap(BuildContext context, String title, WidgetRef ref) {
     switch (title) {
       case 'Core Subjects':
-        // Navigate to filter screen for core subjects
-        ref.read(navigationProvider.notifier).state = AppScreen.filter;
+        // This should navigate to coreSubjects screen
+        ref.read(navigationProvider.notifier).state = AppScreen.coreSubjects;
         break;
       case 'Post Questions':
-        // Navigate to filter screen for practice questions
         ref.read(navigationProvider.notifier).state = AppScreen.filter;
         break;
-      case 'AI Tutor': // Add this case
+      case 'AI Tutor':
+        ref.read(chatContextProvider.notifier).state = null;
+        ref.read(chatNavigationSourceProvider.notifier).state = ChatSource.grid;
         ref.read(navigationProvider.notifier).state = AppScreen.chat;
         break;
       case 'Vocational Training':
-        // Show coming soon message or navigate to vocational screen
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Vocational Training - Coming Soon!')),
         );
         break;
       case 'Language':
-        // Show language selection or navigate to language screen
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Language Selection - Coming Soon!')),
         );
         break;
       default:
-        // Default case for any other items
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$title - Feature Coming Soon!')),
         );
@@ -185,6 +185,7 @@ class DashBoard extends ConsumerWidget {
       floatingActionButton: FloatingActionButton(
         onPressed: () {
           // Set navigation source to dashboard before navigating
+          ref.read(chatContextProvider.notifier).state = null;
           ref.read(chatNavigationSourceProvider.notifier).state =
               ChatSource.dashboard;
           ref.read(navigationProvider.notifier).state = AppScreen.chat;

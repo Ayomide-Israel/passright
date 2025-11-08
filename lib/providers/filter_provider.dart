@@ -71,5 +71,5 @@ class FilterNotifier extends StateNotifier<FilterState> {
   }
 }
 
-// Current screen provider
+// Current screen provider for filter workflow
 final currentScreenProvider = StateProvider<Filters>((ref) => Filters.subject);

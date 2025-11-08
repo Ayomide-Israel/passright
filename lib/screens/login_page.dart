@@ -2,7 +2,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/providers/navigation_provider.dart';
-import 'package:passright/screens/dashboard.dart';
 
 class LoginPage extends ConsumerWidget {
   const LoginPage({super.key});
