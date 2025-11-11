@@ -7,6 +7,8 @@ import 'package:passright/providers/chat_provider.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/services/ai_service.dart';
 import 'package:passright/services/chat_storage_service.dart';
+// 1. MAKE SURE THIS IMPORT IS HERE
+import 'package:passright/providers/language_provider.dart';
 
 class TypingIndicator extends StatelessWidget {
   const TypingIndicator({super.key});
@@ -79,7 +81,6 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     }
   }
 
-  // In diva.dart - replace the _sendInitialMessage method
   void _sendInitialMessage() {
     final chatContext = ref.read(chatContextProvider);
     final chatSource = ref.read(chatNavigationSourceProvider);
@@ -162,6 +163,7 @@ Please provide a comprehensive explanation of the concept behind this question.
     }
   }
 
+  // --- 2. FIRST FIX IS HERE (Inside _sendMessage) ---
   Future<void> _sendMessage(ChatMessage message) async {
     setState(() {
       _messages.insert(0, message);
@@ -175,20 +177,40 @@ Please provide a comprehensive explanation of the concept behind this question.
         .map((msg) => msg.text)
         .join('\n\n');
 
-    await _fetchAIResponse(message.text, context: previousContext);
+    // GET THE CURRENT LANGUAGE FROM THE PROVIDER
+    final currentLanguage = ref.read(languageProvider);
+
+    // PASS THE LANGUAGE TO _fetchAIResponse
+    await _fetchAIResponse(
+      message.text,
+      context: previousContext,
+      language: currentLanguage, // <-- PASS IT HERE
+    );
   }
 
-  Future<void> _fetchAIResponse(String inputText, {String context = ''}) async {
+  // --- 3. SECOND FIX IS HERE (The function definition) ---
+  // You must add 'AppLanguage language' to the parameters here
+  Future<void> _fetchAIResponse(
+    String inputText, {
+    String context = '',
+    AppLanguage language = AppLanguage.english, // <-- ADD THIS PARAMETER
+  }) async {
     try {
       print('🤖 Starting AI request...');
-      
+
       // FIX: Safe substring to avoid RangeError
-      final inputPreviewLength = inputText.length > 100 ? 100 : inputText.length;
-      print('🤖 Input: ${inputText.substring(0, inputPreviewLength)}${inputText.length > 100 ? '...' : ''}');
-      
+      final inputPreviewLength = inputText.length > 100
+          ? 100
+          : inputText.length;
+      print(
+        '🤖 Input: ${inputText.substring(0, inputPreviewLength)}${inputText.length > 100 ? '...' : ''}',
+      );
+
       if (context.isNotEmpty) {
         print('🤖 Context length: ${context.length} characters');
       }
+      // GET LANGUAGE NAME FOR DEBUGGING
+      print('🤖 Requesting response in: ${language.name}');
 
       final aiService = AIService(apiKey: AppConfig.apiKey);
 
@@ -196,10 +218,12 @@ Please provide a comprehensive explanation of the concept behind this question.
         _typingUsers = [_divaUser];
       });
 
-      // Use the provided context for better conversation continuity
+      // Now this line will work, because 'language' is defined
+      // as a parameter of this function
       final response = await aiService.getAIResponse(
         inputText,
         context: context,
+        language: language, // <-- This is where the error was
       );
       print('✅ AI Response received successfully');
 
@@ -260,8 +284,12 @@ ${_getFallbackResponse("")}
     }
 
     // FIX: Safe substring to avoid RangeError
-    final errorPreviewLength = errorString.length > 100 ? 100 : errorString.length;
-    final errorPreview = errorString.substring(0, errorPreviewLength) + (errorString.length > 100 ? '...' : '');
+    final errorPreviewLength = errorString.length > 100
+        ? 100
+        : errorString.length;
+    final errorPreview =
+        errorString.substring(0, errorPreviewLength) +
+        (errorString.length > 100 ? '...' : '');
 
     return """
 ⚠️ **Temporary Issue**
@@ -330,7 +358,6 @@ ${_getFallbackResponse("")}
 
   @override
   Widget build(BuildContext context) {
-
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Theme.of(context).colorScheme.primary,
@@ -356,6 +383,9 @@ ${_getFallbackResponse("")}
                     subtitle =
                         '${chatContext?.subject ?? ''} - ${chatContext?.topic ?? ''}';
                     break;
+
+                  // --- 4. THIS IS THE TYPO FIX ---
+                  // Changed 'ChatSourced' back to 'ChatSource'
                   case ChatSource.resources:
                   case ChatSource.video:
                     subtitle = 'Learning Assistant';

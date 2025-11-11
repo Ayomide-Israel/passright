@@ -26,13 +26,10 @@ class DashBoard extends ConsumerWidget {
       case 'Vocational Training':
         ref.read(navigationProvider.notifier).state =
             AppScreen.vocationalTraining;
-
         break;
       case 'Language':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Language Selection - Coming Soon!')),
-        );
-        break;
+        ref.read(navigationProvider.notifier).state = AppScreen.language;
+        break;      
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$title - Feature Coming Soon!')),

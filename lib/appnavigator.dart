@@ -17,6 +17,7 @@ import 'package:passright/providers/filter_provider.dart';
 import 'package:passright/screens/video_player_screen.dart';
 import 'package:passright/screens/vocational_training_screen.dart';
 import 'package:passright/screens/skill_detail_screen.dart';
+import 'package:passright/screens/language_screen.dart';
 
 class AppNavigator extends ConsumerWidget {
   const AppNavigator({super.key});
@@ -62,6 +63,8 @@ class AppNavigator extends ConsumerWidget {
         return const ExploreResourcesScreen();
       case AppScreen.skillDetail:
         return const SkillDetailScreen();
+      case AppScreen.language:
+        return const LanguageScreen();
       case AppScreen.videoPlayer:
         return const VideoPlayerScreen();
       case AppScreen.vocationalTraining:
