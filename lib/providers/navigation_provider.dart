@@ -14,6 +14,9 @@ enum AppScreen {
   coreSubjects,
   exploreResources,
   videoPlayer,
+  vocationalTraining,
+  skillDetail,
+  language,
 }
 
 // Navigation provider to handle screen changes

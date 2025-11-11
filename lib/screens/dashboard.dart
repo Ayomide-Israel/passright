@@ -24,9 +24,9 @@ class DashBoard extends ConsumerWidget {
         ref.read(navigationProvider.notifier).state = AppScreen.chat;
         break;
       case 'Vocational Training':
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Vocational Training - Coming Soon!')),
-        );
+        ref.read(navigationProvider.notifier).state =
+            AppScreen.vocationalTraining;
+
         break;
       case 'Language':
         ScaffoldMessenger.of(context).showSnackBar(

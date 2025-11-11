@@ -15,6 +15,8 @@ import 'package:passright/screens/core_subjects.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/providers/filter_provider.dart';
 import 'package:passright/screens/video_player_screen.dart';
+import 'package:passright/screens/vocational_training_screen.dart';
+import 'package:passright/screens/skill_detail_screen.dart';
 
 class AppNavigator extends ConsumerWidget {
   const AppNavigator({super.key});
@@ -58,8 +60,12 @@ class AppNavigator extends ConsumerWidget {
         return const ChatScreen();
       case AppScreen.exploreResources:
         return const ExploreResourcesScreen();
+      case AppScreen.skillDetail:
+        return const SkillDetailScreen();
       case AppScreen.videoPlayer:
         return const VideoPlayerScreen();
+      case AppScreen.vocationalTraining:
+        return const VocationalTrainingScreen();
     }
   }
 }
