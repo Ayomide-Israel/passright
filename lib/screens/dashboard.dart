@@ -15,7 +15,7 @@ class DashBoard extends ConsumerWidget {
         // This should navigate to coreSubjects screen
         ref.read(navigationProvider.notifier).state = AppScreen.coreSubjects;
         break;
-      case 'Post Questions':
+      case 'Past Questions':
         ref.read(navigationProvider.notifier).state = AppScreen.filter;
         break;
       case 'AI Tutor':
@@ -29,7 +29,7 @@ class DashBoard extends ConsumerWidget {
         break;
       case 'Language':
         ref.read(navigationProvider.notifier).state = AppScreen.language;
-        break;      
+        break;
       default:
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('$title - Feature Coming Soon!')),

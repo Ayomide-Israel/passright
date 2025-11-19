@@ -5,7 +5,7 @@ import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/providers/resource_provider.dart';
 import 'package:passright/models/resource_model.dart';
 import 'package:passright/providers/chat_provider.dart';
-import 'package:url_launcher/url_launcher.dart'; // <-- STEP 2.1: ADD THIS IMPORT
+import 'package:url_launcher/url_launcher.dart';
 
 class ExploreResourcesScreen extends ConsumerStatefulWidget {
   const ExploreResourcesScreen({super.key});
@@ -20,7 +20,6 @@ class _ExploreResourcesScreenState
   @override
   void initState() {
     super.initState();
-    // Load resources when screen initializes
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _loadResources();
     });

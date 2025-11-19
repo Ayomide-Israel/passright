@@ -8,7 +8,7 @@ final List<Map<String, dynamic>> gridItems = [
     'color': Colors.blue,
   },
   {
-    'title': 'Post Questions',
+    'title': 'Past Questions',
     'subtitle': 'CBT with Timer',
     'image': Image.asset(
       'assets/images/logo3.png',
