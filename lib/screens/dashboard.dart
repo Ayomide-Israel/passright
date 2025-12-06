@@ -1,4 +1,3 @@
-// dashboard.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/providers/navigation_provider.dart';
@@ -8,7 +7,6 @@ import 'package:passright/providers/chat_provider.dart';
 class DashBoard extends ConsumerWidget {
   const DashBoard({super.key});
 
-  // In dashboard.dart - make sure this exists
   void _handleGridItemTap(BuildContext context, String title, WidgetRef ref) {
     switch (title) {
       case 'Core Subjects':
@@ -86,7 +84,7 @@ class DashBoard extends ConsumerWidget {
               ),
               SizedBox(height: 20),
 
-              // Search bar
+              
               Container(
                 padding: EdgeInsets.symmetric(horizontal: 16),
                 decoration: BoxDecoration(
@@ -109,14 +107,14 @@ class DashBoard extends ConsumerWidget {
               ),
               SizedBox(height: 30),
 
-              // Categories title
+              
               Text(
                 'Categories',
                 style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
               ),
               SizedBox(height: 20),
 
-              // Grid view
+            
               Expanded(
                 child: GridView.builder(
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
