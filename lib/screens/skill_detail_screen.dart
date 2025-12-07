@@ -1,36 +1,105 @@
-// screens/skill_detail_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/providers/vocational_provider.dart';
-import 'package:passright/screens/vocational_training_screen.dart';
+import 'package:passright/models/vocational_models.dart';
 
 class SkillDetailScreen extends ConsumerWidget {
   const SkillDetailScreen({super.key});
 
+  void _navigateToLesson(WidgetRef ref, Lesson lesson) {
+    ref.read(currentLessonProvider.notifier).state = lesson;
+    ref.read(navigationProvider.notifier).state = AppScreen.lessonContent;
+  }
+
+  void _showStartLearningOptions(BuildContext context, WidgetRef ref, VocationalSkill skill) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: const Text(
+            'How do you want to learn?',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Color.fromRGBO(26, 61, 124, 1)),
+            textAlign: TextAlign.center,
+          ),
+          content: const Text(
+            'You can start with online video lessons or connect with a local mentor for hands-on training.',
+            textAlign: TextAlign.center,
+          ),
+          actionsAlignment: MainAxisAlignment.center,
+          actionsPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
+          actions: [
+            Column(
+              children: [
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                      if (skill.lessons.isNotEmpty) {
+                        _navigateToLesson(ref, skill.lessons[0]);
+                      } else {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('No online lessons available yet.')),
+                        );
+                      }
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color.fromRGBO(0, 191, 166, 1), // Teal
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text('Go to Courses'),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: OutlinedButton(
+                    onPressed: () {
+                      Navigator.of(context).pop(); // Close dialog
+                      // Navigate to Community/Mentor Finder
+                      // We switch the dashboard tab to "Community" (index 2)
+                      ref.read(dashboardIndexProvider.notifier).state = 2;
+                      ref.read(navigationProvider.notifier).state = AppScreen.dashboard;
+                    },
+                    style: OutlinedButton.styleFrom(
+                      foregroundColor: const Color.fromRGBO(26, 61, 124, 1), // Navy
+                      side: const BorderSide(color: Color.fromRGBO(26, 61, 124, 1)),
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    child: const Text('Find a Mentor'),
+                  ),
+                ),
+              ],
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Watch the provider to get the selected skill
     final skill = ref.watch(selectedSkillProvider);
 
-    // 2. Handle the case where no skill is selected (e.g., app bug)
     if (skill == null) {
       return Scaffold(
         appBar: AppBar(title: const Text('Error')),
-        body: const Center(
-          child: Text('No skill selected. Please go back.'),
-        ),
+        body: const Center(child: Text('No skill selected. Please go back.')),
       );
     }
 
-    // 3. Build the UI
     return Scaffold(
       backgroundColor: const Color.fromARGB(255, 249, 250, 252),
       body: SafeArea(
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // 4. Header
+            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
@@ -43,33 +112,35 @@ class SkillDetailScreen extends ConsumerWidget {
                     },
                   ),
                   const SizedBox(width: 8),
-                  Text(
-                    skill.title, // Dynamic title
-                    style: const TextStyle(
-                      fontSize: 22,
-                      fontWeight: FontWeight.bold,
-                      color: Color.fromRGBO(26, 61, 124, 1),
+                  Expanded(
+                    child: Text(
+                      skill.title, 
+                      style: const TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Color.fromRGBO(26, 61, 124, 1),
+                      ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
               ),
             ),
 
-            // 5. Scrollable Content
+            // Content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Video/Image with Play Button
                     Stack(
                       alignment: Alignment.center,
                       children: [
                         ClipRRect(
                           borderRadius: BorderRadius.circular(16),
                           child: Image.asset(
-                            skill.detailImagePath, // Dynamic image
+                            skill.detailImagePath, 
                             fit: BoxFit.cover,
                             width: double.infinity,
                             height: 200,
@@ -85,7 +156,6 @@ class SkillDetailScreen extends ConsumerWidget {
                             },
                           ),
                         ),
-                        // Play Button
                         Container(
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.5),
@@ -94,19 +164,15 @@ class SkillDetailScreen extends ConsumerWidget {
                           child: IconButton(
                             icon: const Icon(Icons.play_arrow,
                                 color: Colors.white, size: 40),
-                            onPressed: () {
-                              // TODO: Implement video player logic
-                              print('Play video: ${skill.videoUrl}');
-                            },
+                            onPressed: () => _showStartLearningOptions(context, ref, skill),
                           ),
                         ),
                       ],
                     ),
                     const SizedBox(height: 24),
 
-                    // Introduction Text
                     Text(
-                      skill.introductionTitle, // Dynamic intro
+                      skill.introductionTitle, 
                       style: const TextStyle(
                         fontSize: 20,
                         fontWeight: FontWeight.bold,
@@ -115,7 +181,7 @@ class SkillDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 8),
                     Text(
-                      skill.introductionDescription, // Dynamic description
+                      skill.introductionDescription, 
                       style: const TextStyle(
                         fontSize: 16,
                         color: Colors.black54,
@@ -124,7 +190,6 @@ class SkillDetailScreen extends ConsumerWidget {
                     ),
                     const SizedBox(height: 24),
 
-                    // Lessons Section
                     const Text(
                       'Lessons',
                       style: TextStyle(
@@ -134,14 +199,14 @@ class SkillDetailScreen extends ConsumerWidget {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Build the list of lessons
+                    
                     ListView.builder(
                       shrinkWrap: true,
                       physics: const NeverScrollableScrollPhysics(),
                       itemCount: skill.lessons.length,
                       itemBuilder: (context, index) {
                         final lesson = skill.lessons[index];
-                        return _buildLessonItem(context, lesson);
+                        return _buildLessonItem(context, ref, lesson);
                       },
                     ),
                   ],
@@ -149,15 +214,12 @@ class SkillDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            // 6. Bottom "START LEARNING" Button
+            // Start Learning Button
             Container(
               padding: const EdgeInsets.all(20),
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  // TODO: Implement start learning logic
-                  print('Start Learning ${skill.title}');
-                },
+                onPressed: () => _showStartLearningOptions(context, ref, skill),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
                   foregroundColor: Colors.white,
@@ -181,9 +243,7 @@ class SkillDetailScreen extends ConsumerWidget {
     );
   }
 
-  // Helper widget to build the lesson items
-  Widget _buildLessonItem(BuildContext context, Lesson lesson) {
-    // If it's expandable, use ExpansionTile
+  Widget _buildLessonItem(BuildContext context, WidgetRef ref, Lesson lesson) {
     if (lesson.isExpandable) {
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
@@ -196,9 +256,22 @@ class SkillDetailScreen extends ConsumerWidget {
           children: [
             Padding(
               padding: const EdgeInsets.all(16).copyWith(top: 0),
-              child: Text(
-                lesson.content ?? 'No content available.',
-                style: const TextStyle(color: Colors.black54, height: 1.4),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    lesson.content ?? 'No content available.',
+                    style: const TextStyle(color: Colors.black54, height: 1.4),
+                  ),
+                  const SizedBox(height: 10),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => _navigateToLesson(ref, lesson),
+                      child: const Text("Go to Lesson", style: TextStyle(color: Color.fromRGBO(0, 191, 166, 1))),
+                    ),
+                  )
+                ],
               ),
             ),
           ],
@@ -206,7 +279,6 @@ class SkillDetailScreen extends ConsumerWidget {
       );
     }
 
-    // Otherwise, use a simple Card/ListTile
     return Card(
       margin: const EdgeInsets.only(bottom: 12),
       elevation: 1,
@@ -218,10 +290,7 @@ class SkillDetailScreen extends ConsumerWidget {
           lesson.duration ?? '',
           style: const TextStyle(color: Colors.grey),
         ),
-        onTap: () {
-          // TODO: Navigate to lesson
-          print('Tapped lesson: ${lesson.title}');
-        },
+        onTap: () => _navigateToLesson(ref, lesson),
       ),
     );
   }

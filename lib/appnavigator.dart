@@ -1,4 +1,3 @@
-// appnavigator.dart - fix imports and add missing screens
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:passright/diva.dart';
@@ -18,6 +17,8 @@ import 'package:passright/screens/video_player_screen.dart';
 import 'package:passright/screens/vocational_training_screen.dart';
 import 'package:passright/screens/skill_detail_screen.dart';
 import 'package:passright/screens/language_screen.dart';
+import 'package:passright/screens/lesson_content_screen.dart';
+import 'package:passright/screens/mentor_profile_screen.dart'; // Import the new profile screen
 
 class AppNavigator extends ConsumerWidget {
   const AppNavigator({super.key});
@@ -69,6 +70,10 @@ class AppNavigator extends ConsumerWidget {
         return const VideoPlayerScreen();
       case AppScreen.vocationalTraining:
         return const VocationalTrainingScreen();
+      case AppScreen.lessonContent:
+        return const LessonContentScreen();
+      case AppScreen.mentorProfile: // The new route for the Mentor Profile
+        return const MentorProfileScreen();
     }
   }
 }

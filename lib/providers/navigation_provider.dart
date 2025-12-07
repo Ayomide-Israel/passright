@@ -1,4 +1,3 @@
-// navigation_provider.dart
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 enum AppScreen {
@@ -17,10 +16,12 @@ enum AppScreen {
   vocationalTraining,
   skillDetail,
   language,
+  lessonContent,
+  mentorProfile, // Added for the mentor profile screen
 }
 
 // Navigation provider to handle screen changes
 final navigationProvider = StateProvider<AppScreen>((ref) => AppScreen.splash);
 
-// Provider to track the current tab in dashboard
+// Provider to track the current tab in dashboard (Home, Practice, Community, Profile)
 final dashboardIndexProvider = StateProvider<int>((ref) => 0);
