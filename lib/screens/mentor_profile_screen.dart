@@ -16,6 +16,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
   // State to track request status: 0 = Default, 1 = Waiting, 2 = Accepted
   int _requestStatus = 0;
 
+  // ignore: unused_element
   void _launchDialer(String number) async {
     final Uri launchUri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(launchUri)) {

@@ -16,6 +16,7 @@ class VideoPlayerScreen extends ConsumerStatefulWidget {
 
 class _VideoPlayerScreenState extends ConsumerState<VideoPlayerScreen> {
   late YoutubePlayerController _controller;
+  // ignore: unused_field
   bool _isPlayerReady = false;
   bool _isInitialized = false;
   String? _errorMessage;
