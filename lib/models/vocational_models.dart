@@ -1,3 +1,4 @@
+// models/vocational_models.dart
 import 'package:flutter/material.dart';
 
 class Lesson {
@@ -41,7 +42,7 @@ class VocationalSkill {
 class Mentor {
   final String id;
   final String name;
-  final String role; // Changed from businessName to match design better, but can map to it
+  final String role;
   final String skillId;
   final double rating;
   final int reviewCount;
@@ -49,6 +50,7 @@ class Mentor {
   final String imageUrl;
   final bool isVerified;
   final List<String> tags;
+  final String location; // location field
 
   const Mentor({
     required this.id,
@@ -61,6 +63,7 @@ class Mentor {
     required this.imageUrl,
     this.isVerified = false,
     required this.tags,
+    required this.location,
   });
 }
 
@@ -71,11 +74,12 @@ final List<VocationalSkill> vocationalSkills = [
     id: 'catering',
     title: 'Catering',
     description: 'Culinary arts, baking, and food management.',
-    gridImagePath: 'assets/images/catering.png', 
+    gridImagePath: 'assets/images/catering.png',
     detailImagePath: 'assets/images/catering_detail.png',
     color: Colors.orange,
     introductionTitle: 'Master the Art of Cooking',
-    introductionDescription: 'Learn how to prepare local and continental dishes, manage a kitchen, and start your own food business.',
+    introductionDescription:
+        'Learn how to prepare local and continental dishes, manage a kitchen, and start your own food business.',
     lessons: [
       Lesson(title: 'Kitchen Hygiene & Safety', duration: '15 min'),
       Lesson(title: 'Knife Skills 101', duration: '20 min'),
@@ -90,7 +94,8 @@ final List<VocationalSkill> vocationalSkills = [
     detailImagePath: 'assets/images/tailoring_detail.png',
     color: Colors.purple,
     introductionTitle: 'Fashion & Design',
-    introductionDescription: 'Understand fabrics, measurements, and how to sew perfectly fitted clothes.',
+    introductionDescription:
+        'Understand fabrics, measurements, and how to sew perfectly fitted clothes.',
     lessons: [
       Lesson(title: 'Understanding Fabrics', duration: '10 min'),
       Lesson(title: 'Taking Measurements', duration: '25 min'),
@@ -105,7 +110,8 @@ final List<VocationalSkill> vocationalSkills = [
     detailImagePath: 'assets/images/ict_detail.png',
     color: Colors.blue,
     introductionTitle: 'Digital Skills',
-    introductionDescription: 'Learn to code, design graphics, and navigate the digital world.',
+    introductionDescription:
+        'Learn to code, design graphics, and navigate the digital world.',
     lessons: [
       Lesson(title: 'Intro to Computers', duration: '15 min'),
       Lesson(title: 'Graphic Design Basics', duration: '40 min'),
@@ -120,7 +126,8 @@ final List<VocationalSkill> vocationalSkills = [
     detailImagePath: 'assets/images/agriculture_detail.png',
     color: Colors.green,
     introductionTitle: 'Modern Farming',
-    introductionDescription: 'Explore sustainable farming, crop rotation, and agribusiness.',
+    introductionDescription:
+        'Explore sustainable farming, crop rotation, and agribusiness.',
     lessons: [
       Lesson(title: 'Soil Types & Preparation', duration: '20 min'),
       Lesson(title: 'Poultry Management', duration: '35 min'),
@@ -128,6 +135,7 @@ final List<VocationalSkill> vocationalSkills = [
   ),
 ];
 
+// UPDATED MOCK DATA
 final List<Mentor> mockMentors = [
   Mentor(
     id: 'm1',
@@ -140,6 +148,8 @@ final List<Mentor> mockMentors = [
     imageUrl: 'https://i.pravatar.cc/150?u=m1',
     isVerified: true,
     tags: ['Baking', 'Cooking'],
+    // CHANGED THIS LINE BELOW FROM 'Ikeja City Mall, Lagos' TO 'Lokoja, Kogi'
+    location: 'Ganaja Junction, Lokoja, Kogi',
   ),
   Mentor(
     id: 'm2',
@@ -152,6 +162,7 @@ final List<Mentor> mockMentors = [
     imageUrl: 'https://i.pravatar.cc/150?u=m2',
     isVerified: true,
     tags: ['Web Dev', 'Python'],
+    location: 'Yaba College of Technology, Lagos',
   ),
   Mentor(
     id: 'm3',
@@ -164,6 +175,7 @@ final List<Mentor> mockMentors = [
     imageUrl: 'https://i.pravatar.cc/150?u=m3',
     isVerified: false,
     tags: ['Unisex', 'Design'],
+    location: 'Wuse Market, Abuja',
   ),
   Mentor(
     id: 'm4',
@@ -176,6 +188,7 @@ final List<Mentor> mockMentors = [
     imageUrl: 'https://i.pravatar.cc/150?u=m4',
     isVerified: true,
     tags: ['Farming', 'Crops'],
+    location: 'Okpara Square, Enugu',
   ),
   Mentor(
     id: 'm5',
@@ -184,9 +197,10 @@ final List<Mentor> mockMentors = [
     skillId: 'ict',
     rating: 4.6,
     reviewCount: 20,
-    distanceKm: 0.8, 
+    distanceKm: 0.8,
     imageUrl: 'https://i.pravatar.cc/150?u=m5',
     isVerified: true,
     tags: ['React', 'Flutter'],
+    location: 'The Palms Shopping Mall, Lekki, Lagos',
   ),
 ];

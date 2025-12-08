@@ -16,7 +16,6 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
   // State to track request status: 0 = Default, 1 = Waiting, 2 = Accepted
   int _requestStatus = 0;
 
-  // ignore: unused_element
   void _launchDialer(String number) async {
     final Uri launchUri = Uri(scheme: 'tel', path: number);
     if (await canLaunchUrl(launchUri)) {
@@ -24,9 +23,37 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
     }
   }
 
+  // CORRECTED: Launch Google Maps Directions
+  // Origin: Current Location (Automatic)
+  // Destination: Mentor's Address
+  Future<void> _launchMaps(String address) async {
+    final encodedAddress = Uri.encodeComponent(address);
+    // Use the official Universal Cross-Platform Google Maps URL
+    final Uri googleMapsUrl = Uri.parse(
+      'https://www.google.com/maps/dir/?api=1&destination=$encodedAddress',
+    );
+
+    try {
+      if (await canLaunchUrl(googleMapsUrl)) {
+        await launchUrl(googleMapsUrl, mode: LaunchMode.externalApplication);
+      } else {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Could not launch maps application.')),
+          );
+        }
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Error launching maps: $e')));
+      }
+    }
+  }
+
   void _handleRequest() {
     if (_requestStatus == 0) {
-      // 1. Change to "Waiting"
       setState(() {
         _requestStatus = 1;
       });
@@ -38,7 +65,6 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
         ),
       );
 
-      // 2. Simulate Approval after 3 seconds (For demo purposes)
       Future.delayed(const Duration(seconds: 3), () {
         if (mounted) {
           setState(() {
@@ -65,9 +91,8 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
       return const Scaffold(body: Center(child: Text("No mentor selected")));
     }
 
-    // Determine Button Text & Color based on state
     String buttonText = 'Request Mentorship';
-    Color buttonColor = const Color.fromRGBO(0, 191, 166, 1); // Teal
+    Color buttonColor = const Color.fromRGBO(0, 191, 166, 1);
     Color textColor = Colors.white;
 
     if (_requestStatus == 1) {
@@ -79,12 +104,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
     }
 
     return Scaffold(
-      backgroundColor: const Color.fromRGBO(
-        248,
-        249,
-        251,
-        1,
-      ), // Light background
+      backgroundColor: const Color.fromRGBO(248, 249, 251, 1),
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -94,12 +114,11 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
           child: Container(
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              border: Border.all(color: Color.fromRGBO(0, 191, 166, 1)),
+              border: Border.all(color: const Color.fromRGBO(0, 191, 166, 1)),
             ),
             child: IconButton(
               icon: const Icon(Icons.arrow_back, color: Colors.black, size: 20),
               onPressed: () {
-                // Return to Community Tab
                 ref.read(dashboardIndexProvider.notifier).state = 2;
                 ref.read(navigationProvider.notifier).state =
                     AppScreen.dashboard;
@@ -118,18 +137,11 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
       ),
       body: Stack(
         children: [
-          // 1. Scrollable Content
           SingleChildScrollView(
-            padding: const EdgeInsets.fromLTRB(
-              20,
-              10,
-              20,
-              100,
-            ), // Bottom padding for floating button
+            padding: const EdgeInsets.fromLTRB(20, 10, 20, 100),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // --- Profile Header Card ---
                 Container(
                   padding: const EdgeInsets.all(24),
                   decoration: BoxDecoration(
@@ -145,7 +157,6 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                   ),
                   child: Column(
                     children: [
-                      // Avatar
                       Container(
                         padding: const EdgeInsets.all(4),
                         decoration: BoxDecoration(
@@ -169,8 +180,6 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                         ),
                       ),
                       const SizedBox(height: 16),
-
-                      // Name & Role
                       Text(
                         mentor.name,
                         style: const TextStyle(
@@ -189,26 +198,31 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                       ),
                       const SizedBox(height: 20),
 
-                      // Location & Directions Chips
+                      // --- FIXED ROW FOR CHIPS ---
+                      // Used Flexible on the location chip to prevent overflow
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          _buildChip(
-                            Icons.location_on_outlined,
-                            'Lokoja, Kogi',
-                            false,
+                          Flexible(
+                            child: _buildChip(
+                              icon: Icons.location_on_outlined,
+                              text: mentor.location,
+                              isHighlight: false,
+                            ),
                           ),
                           const SizedBox(width: 12),
                           _buildChip(
-                            Icons.directions_outlined,
-                            'Directions',
-                            true,
+                            icon: Icons.directions_outlined,
+                            text: 'Directions',
+                            isHighlight: true,
+                            onTap: () {
+                              _launchMaps(mentor.location);
+                            },
                           ),
                         ],
                       ),
                       const SizedBox(height: 30),
 
-                      // Contact Info Section
                       const Align(
                         alignment: Alignment.centerLeft,
                         child: Text(
@@ -239,17 +253,14 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                     ],
                   ),
                 ),
-
                 const SizedBox(height: 24),
-
-                // --- Biography Section ---
                 Row(
                   children: [
                     Container(
                       width: 4,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: const Color.fromRGBO(0, 191, 166, 1), // Teal Bar
+                        color: const Color.fromRGBO(0, 191, 166, 1),
                         borderRadius: BorderRadius.circular(2),
                       ),
                     ),
@@ -273,10 +284,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                     height: 1.6,
                   ),
                 ),
-
                 const SizedBox(height: 30),
-
-                // --- Skills Offered Section ---
                 Row(
                   children: [
                     Container(
@@ -299,8 +307,6 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                   ],
                 ),
                 const SizedBox(height: 16),
-
-                // Skill Cards
                 _buildSkillCard(
                   title: mentor.skillId == 'catering'
                       ? 'Catering'
@@ -316,17 +322,14 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                   subtitle: 'Incredible and tasty cakes',
                   imagePath: 'assets/images/vocational.png',
                 ),
-
                 const SizedBox(height: 30),
-
-                // --- Stats Container ---
                 Container(
                   padding: const EdgeInsets.symmetric(
                     vertical: 24,
                     horizontal: 20,
                   ),
                   decoration: BoxDecoration(
-                    color: const Color.fromRGBO(229, 231, 235, 0.5), // Grey bg
+                    color: const Color.fromRGBO(229, 231, 235, 0.5),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: Colors.grey.shade300),
                   ),
@@ -341,13 +344,10 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                     ],
                   ),
                 ),
-                // Extra space for scrolling above the floating button
                 const SizedBox(height: 20),
               ],
             ),
           ),
-
-          // 2. Floating Action Button (Sticky Bottom)
           Positioned(
             left: 0,
             right: 0,
@@ -370,9 +370,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
                 width: double.infinity,
                 height: 56,
                 child: ElevatedButton(
-                  onPressed: _requestStatus == 0
-                      ? _handleRequest
-                      : null, // Disable if already requested
+                  onPressed: _requestStatus == 0 ? _handleRequest : null,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: buttonColor,
                     foregroundColor: textColor,
@@ -407,38 +405,53 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
     );
   }
 
-  // --- Helper Widgets ---
-
-  Widget _buildChip(IconData icon, String text, bool isHighlight) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-      decoration: BoxDecoration(
-        color: isHighlight
-            ? const Color.fromRGBO(0, 191, 166, 0.1)
-            : Colors.grey[100],
-        borderRadius: BorderRadius.circular(20),
-      ),
-      child: Row(
-        children: [
-          Icon(
-            icon,
-            size: 16,
-            color: isHighlight
-                ? const Color.fromRGBO(0, 191, 166, 1)
-                : Colors.grey[600],
-          ),
-          const SizedBox(width: 6),
-          Text(
-            text,
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w600,
+  // UPDATED: Fixed overflow by removing Fixed Width and using Flexible inside
+  Widget _buildChip({
+    required IconData icon,
+    required String text,
+    required bool isHighlight,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isHighlight
+              ? const Color.fromRGBO(0, 191, 166, 0.1)
+              : Colors.grey[100],
+          borderRadius: BorderRadius.circular(20),
+          border: isHighlight
+              ? Border.all(color: const Color.fromRGBO(0, 191, 166, 0.5))
+              : null,
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min, // shrink to fit
+          children: [
+            Icon(
+              icon,
+              size: 16,
               color: isHighlight
                   ? const Color.fromRGBO(0, 191, 166, 1)
-                  : Colors.grey[700],
+                  : Colors.grey[600],
             ),
-          ),
-        ],
+            const SizedBox(width: 6),
+            Flexible(
+              child: Text(
+                text,
+                style: TextStyle(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w600,
+                  color: isHighlight
+                      ? const Color.fromRGBO(0, 191, 166, 1)
+                      : Colors.grey[700],
+                ),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -450,7 +463,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: const Color.fromRGBO(0, 191, 166, 0.1), // Light teal circle
+            color: const Color.fromRGBO(0, 191, 166, 0.1),
             shape: BoxShape.circle,
           ),
           child: Icon(
@@ -552,7 +565,7 @@ class _MentorProfileScreenState extends ConsumerState<MentorProfileScreen> {
           style: const TextStyle(
             fontSize: 22,
             fontWeight: FontWeight.bold,
-            color: Color.fromRGBO(0, 191, 166, 1), // Teal
+            color: Color.fromRGBO(0, 191, 166, 1),
           ),
         ),
         const SizedBox(height: 4),
