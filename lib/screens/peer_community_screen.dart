@@ -23,7 +23,9 @@ class PeerCommunityScreen extends ConsumerWidget {
                       Container(
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
-                          border: Border.all(color: Colors.grey.shade300),
+                          border: Border.all(
+                            color: Color.fromRGBO(0, 191, 166, 1),
+                          ),
                         ),
                         child: IconButton(
                           icon: const Icon(
