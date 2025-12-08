@@ -60,10 +60,10 @@ class SkillDetailScreen extends ConsumerWidget {
                   child: OutlinedButton(
                     onPressed: () {
                       Navigator.of(context).pop(); // Close dialog
-                      // Navigate to Community/Mentor Finder
-                      // We switch the dashboard tab to "Community" (index 2)
-                      ref.read(dashboardIndexProvider.notifier).state = 2;
-                      ref.read(navigationProvider.notifier).state = AppScreen.dashboard;
+                      
+                      // CORRECTED LOGIC: Navigate directly to the Connect Screen
+                      // Do NOT set dashboard index to 2 (which is the Hub)
+                      ref.read(navigationProvider.notifier).state = AppScreen.mentorList;
                     },
                     style: OutlinedButton.styleFrom(
                       foregroundColor: const Color.fromRGBO(26, 61, 124, 1), // Navy
@@ -99,7 +99,6 @@ class SkillDetailScreen extends ConsumerWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
               child: Row(
@@ -127,7 +126,6 @@ class SkillDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            // Content
             Expanded(
               child: SingleChildScrollView(
                 padding: const EdgeInsets.all(20),
@@ -214,7 +212,6 @@ class SkillDetailScreen extends ConsumerWidget {
               ),
             ),
 
-            // Start Learning Button
             Container(
               padding: const EdgeInsets.all(20),
               width: double.infinity,
@@ -244,14 +241,14 @@ class SkillDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildLessonItem(BuildContext context, WidgetRef ref, Lesson lesson) {
+    // ... (Keep existing implementation for _buildLessonItem)
     if (lesson.isExpandable) {
       return Card(
         margin: const EdgeInsets.only(bottom: 12),
         elevation: 1,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         child: ExpansionTile(
-          title: Text(lesson.title,
-              style: const TextStyle(fontWeight: FontWeight.w500)),
+          title: Text(lesson.title, style: const TextStyle(fontWeight: FontWeight.w500)),
           trailing: const Icon(Icons.arrow_drop_down),
           children: [
             Padding(
@@ -259,10 +256,7 @@ class SkillDetailScreen extends ConsumerWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    lesson.content ?? 'No content available.',
-                    style: const TextStyle(color: Colors.black54, height: 1.4),
-                  ),
+                  Text(lesson.content ?? 'No content available.', style: const TextStyle(color: Colors.black54, height: 1.4)),
                   const SizedBox(height: 10),
                   Align(
                     alignment: Alignment.centerRight,
@@ -284,12 +278,8 @@ class SkillDetailScreen extends ConsumerWidget {
       elevation: 1,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: ListTile(
-        title: Text(lesson.title,
-            style: const TextStyle(fontWeight: FontWeight.w500)),
-        trailing: Text(
-          lesson.duration ?? '',
-          style: const TextStyle(color: Colors.grey),
-        ),
+        title: Text(lesson.title, style: const TextStyle(fontWeight: FontWeight.w500)),
+        trailing: Text(lesson.duration ?? '', style: const TextStyle(color: Colors.grey)),
         onTap: () => _navigateToLesson(ref, lesson),
       ),
     );

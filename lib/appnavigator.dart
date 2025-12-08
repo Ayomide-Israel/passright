@@ -4,6 +4,8 @@ import 'package:passright/diva.dart';
 import 'package:passright/screens/dashboard.dart';
 import 'package:passright/screens/explore_resources.dart';
 import 'package:passright/screens/filter.dart';
+import 'package:passright/screens/group_detail_screen.dart';
+import 'package:passright/screens/peer_community_screen.dart';
 import 'package:passright/screens/practice.dart';
 import 'package:passright/screens/questions_detail.dart';
 import 'package:passright/screens/splash_screen.dart';
@@ -18,7 +20,9 @@ import 'package:passright/screens/vocational_training_screen.dart';
 import 'package:passright/screens/skill_detail_screen.dart';
 import 'package:passright/screens/language_screen.dart';
 import 'package:passright/screens/lesson_content_screen.dart';
-import 'package:passright/screens/mentor_profile_screen.dart'; // Import the new profile screen
+import 'package:passright/screens/mentor_profile_screen.dart';
+import 'package:passright/screens/mentor_list.dart';
+import 'package:passright/screens/community_hub_screen.dart'; // Import Hub Screen
 
 class AppNavigator extends ConsumerWidget {
   const AppNavigator({super.key});
@@ -60,6 +64,10 @@ class AppNavigator extends ConsumerWidget {
         );
       case AppScreen.chat:
         return const ChatScreen();
+      case AppScreen.peerCommunity:
+        return const PeerCommunityScreen();
+      case AppScreen.groupDetail:
+        return const GroupDetailScreen();
       case AppScreen.exploreResources:
         return const ExploreResourcesScreen();
       case AppScreen.skillDetail:
@@ -72,8 +80,12 @@ class AppNavigator extends ConsumerWidget {
         return const VocationalTrainingScreen();
       case AppScreen.lessonContent:
         return const LessonContentScreen();
-      case AppScreen.mentorProfile: // The new route for the Mentor Profile
+      case AppScreen.mentorProfile:
         return const MentorProfileScreen();
+      case AppScreen.mentorList:
+        return const MentorScreen();
+      case AppScreen.communityHub: // New Hub Route
+        return const CommunityHubScreen();
     }
   }
 }

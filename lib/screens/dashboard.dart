@@ -4,25 +4,23 @@ import 'package:passright/providers/navigation_provider.dart';
 import 'package:passright/models/grid_item_data.dart';
 import 'package:passright/providers/chat_provider.dart';
 import 'package:passright/screens/filter.dart';
-import 'package:passright/screens/community_connect_screen.dart';
+import 'package:passright/screens/community_hub_screen.dart'; // Changed from CommunityConnectScreen
 
 class DashBoard extends ConsumerWidget {
   const DashBoard({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    // 1. Get the current tab index from the provider
     final currentIndex = ref.watch(dashboardIndexProvider);
 
-    // 2. Define the bodies for each tab
     Widget buildBody() {
       switch (currentIndex) {
         case 0:
-          return const _HomeContent(); // The main dashboard grid
+          return const _HomeContent();
         case 1:
-          return const FiltersScreen(); // "Practice" Tab opens filters
+          return const FiltersScreen();
         case 2:
-          return const CommunityConnectScreen(); // "Community" Tab opens radar
+          return const CommunityHubScreen(); // Shows Hub first
         case 3:
           return const Center(child: Text("Profile - Coming Soon"));
         default:
@@ -31,10 +29,9 @@ class DashBoard extends ConsumerWidget {
     }
 
     return Scaffold(
-      // 3. Show the correct body based on the tab
+      backgroundColor: Colors.white,
       body: buildBody(),
       
-      // Floating Action Button (Only on Home)
       floatingActionButton: currentIndex == 0 ? FloatingActionButton(
         onPressed: () {
           ref.read(chatContextProvider.notifier).state = null;
@@ -42,35 +39,58 @@ class DashBoard extends ConsumerWidget {
           ref.read(navigationProvider.notifier).state = AppScreen.chat;
         },
         backgroundColor: const Color.fromRGBO(0, 191, 166, 1),
-        child: Image.asset('assets/images/Group_9.png'),
+        shape: const CircleBorder(),
+        child: Image.asset('assets/images/Group_9.png'), 
       ) : null,
       floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
 
-      // 4. Bottom Navigation Bar
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: currentIndex,
         onTap: (index) {
-          // Update the provider to switch tabs
           ref.read(dashboardIndexProvider.notifier).state = index;
         },
         type: BottomNavigationBarType.fixed,
-        selectedItemColor: const Color.fromARGB(255, 5, 70, 122),
+        backgroundColor: Colors.white,
+        selectedItemColor: const Color.fromRGBO(5, 70, 122, 1),
         unselectedItemColor: Colors.grey,
+        selectedLabelStyle: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+        unselectedLabelStyle: const TextStyle(fontWeight: FontWeight.w500, fontSize: 12),
+        elevation: 10,
         items: [
           BottomNavigationBarItem(
-            icon: Image.asset('assets/images/home.png', color: currentIndex == 0 ? const Color.fromARGB(255, 5, 70, 122) : Colors.grey),
+            icon: Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Image.asset('assets/images/home.png', 
+                height: 24,
+                color: currentIndex == 0 ? const Color.fromRGBO(5, 70, 122, 1) : Colors.grey),
+            ),
             label: 'Home',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset('assets/images/evaluation.png', color: currentIndex == 1 ? const Color.fromARGB(255, 5, 70, 122) : Colors.grey),
+            icon: Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Image.asset('assets/images/evaluation.png', 
+                height: 24,
+                color: currentIndex == 1 ? const Color.fromRGBO(5, 70, 122, 1) : Colors.grey),
+            ),
             label: 'Practice',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset('assets/images/logo5.png', scale: 9, color: currentIndex == 2 ? const Color.fromARGB(255, 5, 70, 122) : Colors.grey),
+            icon: Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Image.asset('assets/images/logo5.png', 
+                height: 24,
+                color: currentIndex == 2 ? const Color.fromRGBO(5, 70, 122, 1) : Colors.grey),
+            ),
             label: 'Community',
           ),
           BottomNavigationBarItem(
-            icon: Image.asset('assets/images/Frame.png', scale: 1, color: currentIndex == 3 ? const Color.fromARGB(255, 5, 70, 122) : Colors.grey),
+            icon: Padding(
+              padding: const EdgeInsets.only(bottom: 4),
+              child: Image.asset('assets/images/Frame.png', 
+                height: 24,
+                color: currentIndex == 3 ? const Color.fromRGBO(5, 70, 122, 1) : Colors.grey),
+            ),
             label: 'Profile',
           ),
         ],
@@ -79,7 +99,6 @@ class DashBoard extends ConsumerWidget {
   }
 }
 
-// Extracted Home Content Widget to keep code clean
 class _HomeContent extends ConsumerWidget {
   const _HomeContent();
 
@@ -106,50 +125,141 @@ class _HomeContent extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     return SafeArea(
       child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 30),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Header
             Row(
               children: [
-                const Text('Hello, Faith', style: TextStyle(color: Color.fromRGBO(26, 61, 124, 1), fontWeight: FontWeight.w900, fontSize: 24)),
+                const Text(
+                  'Hello, Faith', 
+                  style: TextStyle(
+                    color: Color.fromRGBO(26, 61, 124, 1), 
+                    fontWeight: FontWeight.w900, 
+                    fontSize: 24
+                  )
+                ),
                 const Spacer(),
-                IconButton(onPressed: (){}, icon: const Icon(Icons.notifications_none, color: Colors.teal)),
-                IconButton(onPressed: (){}, icon: const Icon(Icons.settings, color: Colors.teal)),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: IconButton(
+                    onPressed: (){}, 
+                    icon: const Icon(Icons.notifications_none, color: Color.fromRGBO(5, 70, 122, 1)),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Container(
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: IconButton(
+                    onPressed: (){}, 
+                    icon: const Icon(Icons.settings_outlined, color: Color.fromRGBO(5, 70, 122, 1)),
+                    constraints: const BoxConstraints(),
+                    padding: const EdgeInsets.all(8),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 20),
-            
-            // Search
+            const SizedBox(height: 24),
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              decoration: BoxDecoration(color: const Color.fromRGBO(241, 242, 245, 1), borderRadius: BorderRadius.circular(12), border: Border.all(color: Colors.grey[300]!)),
-              child: const TextField(decoration: InputDecoration(hintText: 'Search by subject, topic, or year', border: InputBorder.none, icon: Icon(Icons.search, color: Colors.teal))),
+              decoration: BoxDecoration(
+                color: const Color.fromRGBO(248, 249, 251, 1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey.shade200),
+              ),
+              child: const TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search by subject, topic, or year',
+                  hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                  border: InputBorder.none,
+                  prefixIcon: Icon(Icons.search, color: Color.fromRGBO(0, 191, 166, 1)),
+                  contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                ),
+              ),
             ),
             const SizedBox(height: 30),
-            
-            // Grid
-            const Text('Categories', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
-            const SizedBox(height: 20),
+            const Text(
+              'Categories', 
+              style: TextStyle(
+                fontSize: 18, 
+                fontWeight: FontWeight.bold,
+                color: Color.fromRGBO(26, 61, 124, 1) 
+              )
+            ),
+            const SizedBox(height: 16),
             Expanded(
               child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount: 2, crossAxisSpacing: 16, mainAxisSpacing: 16, childAspectRatio: 0.9),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2, 
+                  crossAxisSpacing: 16, 
+                  mainAxisSpacing: 16, 
+                  childAspectRatio: 0.85 
+                ),
                 itemCount: gridItems.length,
                 itemBuilder: (context, index) {
                   final item = gridItems[index];
                   return GestureDetector(
                     onTap: () => _handleGridItemTap(context, item['title'], ref),
                     child: Container(
-                      decoration: BoxDecoration(color: item['color'].withOpacity(0.1), borderRadius: BorderRadius.circular(16), border: Border.all(color: item['color'].withOpacity(0.3))),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(20),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.03),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          )
+                        ],
+                        border: Border.all(color: Colors.grey.shade100),
+                      ),
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          item['image'],
-                          const SizedBox(height: 12),
-                          Text(item['title'], style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16), textAlign: TextAlign.center),
+                          Container(
+                            padding: const EdgeInsets.all(16),
+                            decoration: BoxDecoration(
+                              color: (item['color'] as Color).withOpacity(0.1),
+                              shape: BoxShape.circle,
+                            ),
+                            child: SizedBox(
+                              width: 32,
+                              height: 32,
+                              child: item['image'], 
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            item['title'], 
+                            style: const TextStyle(
+                              fontWeight: FontWeight.bold, 
+                              fontSize: 16,
+                              color: Color.fromRGBO(26, 61, 124, 1)
+                            ), 
+                            textAlign: TextAlign.center
+                          ),
                           const SizedBox(height: 8),
-                          Text(item['subtitle'], style: TextStyle(fontSize: 12, color: Colors.grey[600]), textAlign: TextAlign.center),
+                          Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 8.0),
+                            child: Text(
+                              item['subtitle'], 
+                              style: TextStyle(
+                                fontSize: 12, 
+                                color: Colors.grey[500],
+                                height: 1.2
+                              ), 
+                              textAlign: TextAlign.center,
+                              maxLines: 2,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ),
                         ],
                       ),
                     ),
