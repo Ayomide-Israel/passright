@@ -365,7 +365,7 @@ ${_getFallbackResponse("")}
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text('Diva AI Tutor'),
+            const Text('PassRight AI'),
             Consumer(
               builder: (context, ref, child) {
                 final chatSource = ref.watch(chatNavigationSourceProvider);
