@@ -57,32 +57,5 @@ env.dart
 !/lib/providers/ai_service_provider.template.dart
 
 # Clear Git's cache
-```bash
-git rm -r --cached .
-git add .
-git commit -m "Clean repository and update gitignore rules"
-git push origin main --force
-```
-
-4. Create your local provider file with the new API key:
-
-````dart
-// filepath: [ai_service_provider.dart](http://_vscodecontentref_/1)
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../services/ai_service.dart';
-import '../config/app_config.dart';
-
-final aiServiceProvider = Provider<AIService>((ref) {
-  throw Exception(
-    'AIService not initialized. Call initializeAIService() first.',
-  );
-});
-
-final aiServiceInitializerProvider = Provider<Future<AIService>>((ref) async {
-  await Future.delayed(
-    const Duration(milliseconds: 100),
-  );
-  
-  return AIService(apiKey: AppConfig.apiKey);
-});
-````
+/lib/config/app_config.dart
+/lib/core/config/app_config.dart
